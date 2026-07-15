@@ -31,5 +31,34 @@ target 'TinyIceCafeFishCooking' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Work around fmt 11.0.2 consteval failures with Apple Clang in Xcode 26.4.
+    # See https://github.com/expo/expo/issues/44229
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+
+      target.build_configurations.each do |build_config|
+        build_config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
+
+    fmt_base = File.join(
+      installer.sandbox.pod_dir('fmt'),
+      'include',
+      'fmt',
+      'base.h'
+    )
+    if File.exist?(fmt_base)
+      content = File.read(fmt_base)
+      patched = content.gsub(
+        /^#\s*define FMT_USE_CONSTEVAL 1$/,
+        '# define FMT_USE_CONSTEVAL 0'
+      )
+
+      if patched != content
+        File.chmod(0644, fmt_base)
+        File.write(fmt_base, patched)
+      end
+    end
   end
 end

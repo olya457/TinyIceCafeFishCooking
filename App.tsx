@@ -1,131 +1,276 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useEffect, useRef, useState} from 'react';
+import {Animated, StyleSheet, View} from 'react-native';
+import Video from 'react-native-video';
+import {media} from './src/assets';
+import {GameLoader} from './src/components/GameLoader';
+import {LevelModal} from './src/components/GameModals';
+import {CookingScreen} from './src/screens/CookingScreen';
+import {FishingScreen} from './src/screens/FishingScreen';
+import {HomeScreen} from './src/screens/HomeScreen';
+import {OnboardingScreen} from './src/screens/OnboardingScreen';
+import {ShopScreen} from './src/screens/ShopScreen';
+import {SplashScreen} from './src/screens/SplashScreen';
+import {SettingsScreen} from './src/screens/SettingsScreen';
+import {loadProgress, saveProgress} from './src/storage/progress';
+import type {Game, Screen} from './src/types/navigation';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+export default function App(): React.JSX.Element {
+  const [screen, setScreen] = useState<Screen>('splash');
+  const [onboardingPage, setOnboardingPage] = useState(-1);
+  const [cookingLevel, setCookingLevel] = useState(1);
+  const [highestCookingLevel, setHighestCookingLevel] = useState(1);
+  const [fishingLevel, setFishingLevel] = useState(1);
+  const [highestFishingLevel, setHighestFishingLevel] = useState(1);
+  const [cookingCoins, setCookingCoins] = useState(0);
+  const [fishingCoins, setFishingCoins] = useState(0);
+  const [purchasedShopItems, setPurchasedShopItems] = useState<string[]>([]);
+  const [hearts, setHearts] = useState(5);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const [homeGame, setHomeGame] = useState<Game>('cooking');
+  const [sound, setSound] = useState(true);
+  const [music, setMusic] = useState(true);
+  const [levelModal, setLevelModal] = useState<Game | null>(null);
+  const [loadingGame, setLoadingGame] = useState<Game | null>(null);
+  const loaderProgress = useRef(new Animated.Value(0)).current;
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(loaderProgress, {
+          toValue: 1,
+          duration: 850,
+          useNativeDriver: true,
+        }),
+        Animated.timing(loaderProgress, {
+          toValue: 0,
+          duration: 850,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    animation.start();
+    const timer = setTimeout(() => setScreen('onboarding'), 5000);
+    return () => {
+      clearTimeout(timer);
+      animation.stop();
+    };
+  }, [loaderProgress]);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(() => {
+    loadProgress().then(saved => {
+      if (saved) {
+        setCookingLevel(Math.min(Math.max(saved.cookingLevel, 1), 11));
+        setHighestCookingLevel(
+          Math.min(Math.max(saved.highestCookingLevel, 1), 11),
+        );
+        setFishingLevel(Math.min(Math.max(saved.fishingLevel, 1), 11));
+        setHighestFishingLevel(
+          Math.min(Math.max(saved.highestFishingLevel, 1), 11),
+        );
+        setCookingCoins(Math.max(saved.cookingCoins, 0));
+        setFishingCoins(Math.max(saved.fishingCoins, 0));
+        setPurchasedShopItems(saved.purchasedShopItems ?? []);
+      }
+      setProgressLoaded(true);
+    });
+  }, []);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  useEffect(() => {
+    if (!progressLoaded) return;
+    saveProgress({
+      cookingLevel,
+      highestCookingLevel,
+      fishingLevel,
+      highestFishingLevel,
+      cookingCoins,
+      fishingCoins,
+      purchasedShopItems,
+    });
+  }, [
+    cookingCoins,
+    cookingLevel,
+    fishingCoins,
+    fishingLevel,
+    highestCookingLevel,
+    highestFishingLevel,
+    progressLoaded,
+    purchasedShopItems,
+  ]);
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const startGame = () => {
+    if (!levelModal) return;
+    const game = levelModal;
+    setLevelModal(null);
+    setLoadingGame(game);
+    setTimeout(() => {
+      setLoadingGame(null);
+      setScreen(game);
+    }, 1600);
   };
-
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
-
+  const finishCookingLevel = () => {
+    const nextLevel = Math.min(cookingLevel + 1, 11);
+    setCookingLevel(nextLevel);
+    setHighestCookingLevel(current => Math.max(current, nextLevel));
+    setHearts(5);
+    setHomeGame('cooking');
+    setScreen('home');
+  };
+  const finishFishingLevel = () => {
+    const nextLevel = Math.min(fishingLevel + 1, 11);
+    setFishingLevel(nextLevel);
+    setHighestFishingLevel(current => Math.max(current, nextLevel));
+    setHomeGame('fishing');
+    setScreen('home');
+  };
+  const restartAfterGameOver = () => {
+    setCookingLevel(current => Math.max(1, current - 1));
+    setHearts(5);
+    setHomeGame('cooking');
+    setScreen('home');
+  };
+  const selectedLevel = levelModal === 'fishing' ? fishingLevel : cookingLevel;
+  const selectedHighestLevel =
+    levelModal === 'fishing' ? highestFishingLevel : highestCookingLevel;
+  const selectLevel = (nextLevel: number) =>
+    levelModal === 'fishing'
+      ? setFishingLevel(nextLevel)
+      : setCookingLevel(nextLevel);
+  const buyShopItem = (id: string, price: number) => {
+    if (purchasedShopItems.includes(id) || cookingCoins < price) return false;
+    setCookingCoins(current => current - price);
+    setPurchasedShopItems(current => [...current, id]);
+    return true;
+  };
+  const resetCookingProgress = () => {
+    setCookingLevel(1);
+    setHighestCookingLevel(1);
+    setCookingCoins(0);
+    setPurchasedShopItems([]);
+    setHearts(5);
+  };
+  const resetFishingProgress = () => {
+    setFishingLevel(1);
+    setHighestFishingLevel(1);
+    setFishingCoins(0);
+  };
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <View style={styles.fill}>
+      {screen === 'splash' && <SplashScreen progress={loaderProgress} />}
+      {screen === 'onboarding' && (
+        <OnboardingScreen
+          page={onboardingPage}
+          sound={sound}
+          onPage={setOnboardingPage}
+          onDone={() => setScreen('home')}
+        />
+      )}
+      {screen !== 'splash' && screen !== 'onboarding' && (
+        <>
+          {screen === 'home' && (
+            <HomeScreen
+              cookingCoins={cookingCoins}
+              fishingCoins={fishingCoins}
+              hearts={hearts}
+              initialGame={homeGame}
+              onGame={setLevelModal}
+              onShop={() => setScreen('shop')}
+              onSettings={() => setScreen('settings')}
+            />
+          )}
+          {screen === 'cooking' && (
+            <CookingScreen
+              level={cookingLevel}
+              coins={cookingCoins}
+              hearts={hearts}
+              onCoins={value => setCookingCoins(current => current + value)}
+              onLoseHeart={() => setHearts(current => Math.max(0, current - 1))}
+              onHome={() => {
+                setHomeGame('cooking');
+                setScreen('home');
+              }}
+              onGameOver={restartAfterGameOver}
+              onLevelComplete={finishCookingLevel}
+              onSettings={() => setScreen('settings')}
+            />
+          )}
+          {screen === 'fishing' && (
+            <FishingScreen
+              level={fishingLevel}
+              coins={fishingCoins}
+              onCoins={value => setFishingCoins(current => current + value)}
+              onHome={() => {
+                setHomeGame('fishing');
+                setScreen('home');
+              }}
+              onLevelComplete={finishFishingLevel}
+              onSettings={() => setScreen('settings')}
+            />
+          )}
+          {screen === 'shop' && (
+            <ShopScreen
+              coins={cookingCoins}
+              purchasedItems={purchasedShopItems}
+              onBuy={buyShopItem}
+              onHome={() => {
+                setHomeGame('cooking');
+                setScreen('home');
+              }}
+              onFishing={() => {
+                setHomeGame('fishing');
+                setScreen('home');
+              }}
+              onSettings={() => setScreen('settings')}
+            />
+          )}
+          {screen === 'settings' && (
+            <SettingsScreen
+              sound={sound}
+              music={music}
+              onSound={setSound}
+              onMusic={setMusic}
+              onResetCooking={resetCookingProgress}
+              onResetFishing={resetFishingProgress}
+              onFishing={() => {
+                setHomeGame('fishing');
+                setScreen('home');
+              }}
+              onShop={() => setScreen('shop')}
+              onHome={() => {
+                setHomeGame('cooking');
+                setScreen('home');
+              }}
+            />
+          )}
+          <LevelModal
+            game={levelModal}
+            level={selectedLevel}
+            maxUnlockedLevel={selectedHighestLevel}
+            onLevel={selectLevel}
+            onClose={() => setLevelModal(null)}
+            onPlay={startGame}
+          />
+          <GameLoader
+            game={loadingGame}
+            level={loadingGame === 'fishing' ? fishingLevel : cookingLevel}
+            progress={loaderProgress}
+          />
+        </>
+      )}
+      {music && (
+        <Video
+          source={media.backgroundMusic}
+          repeat
+          volume={0.18}
+          ignoreSilentSwitch="ignore"
+          playInBackground
+          style={styles.media}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  fill: {flex: 1},
+  media: {width: 1, height: 1, position: 'absolute'},
 });
-
-export default App;
