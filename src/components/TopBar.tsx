@@ -7,9 +7,9 @@ export function CoinBadge({coins}: {coins: number}) {
   return <View style={styles.stat}><Text style={styles.coin}>●</Text><Text style={styles.value}>{coins}</Text></View>;
 }
 
-export function TopBar({hearts, coins, onSettings, showSettings = false}: {hearts: number; coins: number; onSettings: () => void; showSettings?: boolean}) {
+export function TopBar({hearts, coins, onSettings, showSettings = false, showHearts = true}: {hearts: number; coins: number; onSettings: () => void; showSettings?: boolean; showHearts?: boolean}) {
   return <View style={styles.bar}>
-    <View style={styles.stat}><Text style={styles.heart}>♥</Text><Text style={styles.value}>{hearts}</Text></View>
+    {showHearts && <View style={styles.stat}><Text style={styles.heart}>♥</Text><Text style={styles.value}>{hearts}</Text></View>}
     <CoinBadge coins={coins} />
     {showSettings && <SquareButton icon="⚙" onPress={onSettings} />}
   </View>;

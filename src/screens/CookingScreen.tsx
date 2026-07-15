@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Image, ImageBackground, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {Image, ImageBackground, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
 import {backgrounds, characters, cooking} from '../assets';
 import {CompleteModal, GameOverModal, PauseModal} from '../components/GameModals';
 import {SquareButton} from '../components/SquareButton';
@@ -20,6 +20,8 @@ const randomDifferentIndex = (current: number, length: number) =>
   (current + 1 + Math.floor(Math.random() * (length - 1))) % length;
 
 export function CookingScreen({level, coins, hearts, onCoins, onLoseHeart, onHome, onGameOver, onLevelComplete, onSettings}: {level: number; coins: number; hearts: number; onCoins: (n: number) => void; onLoseHeart: () => void; onHome: () => void; onGameOver: () => void; onLevelComplete: () => void; onSettings: () => void}) {
+  const {height} = useWindowDimensions();
+  const compact = height < 720;
   const target = LEVELS[level - 1][0];
   const [served, setServed] = useState(0);
   const [earnedCoins, setEarnedCoins] = useState(0);
@@ -124,7 +126,7 @@ export function CookingScreen({level, coins, hearts, onCoins, onLoseHeart, onHom
       <TopBar hearts={hearts} coins={coins} onSettings={onSettings} showSettings={false} />
       <View style={[styles.orderTimer, orderSeconds <= 10 && styles.orderTimerDanger]}><Text style={styles.orderTimerText}>⏱ {orderSeconds}</Text></View>
 
-      <Pressable style={styles.customerArea} onPress={serveDish}>
+      <Pressable style={[styles.customerArea, compact && styles.customerAreaCompact]} onPress={serveDish}>
         <Image source={characters[customerIndex]} style={styles.customer} resizeMode="contain" />
         <View style={styles.orderCard}>
           <Text style={styles.recipeName}>{recipe.name}</Text>
@@ -134,7 +136,7 @@ export function CookingScreen({level, coins, hearts, onCoins, onLoseHeart, onHom
         </View>
       </Pressable>
 
-      <View style={styles.kitchenArea}>
+      <View style={[styles.kitchenArea, compact && styles.kitchenAreaCompact]}>
         <Image source={cooking.counter} style={styles.counter} resizeMode="stretch" />
 
         <Pressable style={styles.teapotSlot} onPress={() => setTeapotVisible(true)}>
@@ -176,8 +178,8 @@ export function CookingScreen({level, coins, hearts, onCoins, onLoseHeart, onHom
         </Pressable>
       </View>
 
-      <Pressable disabled={!orderReady} onPress={serveDish} style={[styles.progress, orderReady && styles.progressReady]}><Text style={styles.progressText}>{orderReady ? 'Tap customer to serve' : `${served}/${target} customers`}</Text></Pressable>
-      <View style={styles.pause}><SquareButton icon="Ⅱ" onPress={() => setPaused(true)} /></View>
+      <Pressable disabled={!orderReady} onPress={serveDish} style={[styles.progress, compact && styles.progressCompact, orderReady && styles.progressReady]}><Text style={[styles.progressText, compact && styles.progressTextCompact]}>{orderReady ? 'Tap customer to serve' : `${served}/${target} customers`}</Text></Pressable>
+      <View style={[styles.pause, compact && styles.pauseCompact]}><SquareButton icon="Ⅱ" onPress={() => setPaused(true)} /></View>
       <PauseModal visible={paused} onResume={() => setPaused(false)} onHome={onHome} onSettings={onSettings} />
       <CompleteModal visible={complete} coins={earnedCoins} onHome={onLevelComplete} />
       <GameOverModal visible={hearts <= 0 && !complete} onRestart={onGameOver} />
@@ -187,11 +189,13 @@ export function CookingScreen({level, coins, hearts, onCoins, onLoseHeart, onHom
 
 const styles = StyleSheet.create({
   fill: {flex: 1},
-  customerArea: {position: 'absolute', top: '9%', left: 0, right: 0, height: '38%', alignItems: 'center', justifyContent: 'flex-end', transform: [{translateY: 120}], zIndex: 1},
-  customer: {height: '112%', width: '68%'},
+  customerArea: {position: 'absolute', top: '12%', left: 0, right: 0, height: '42%', alignItems: 'center', justifyContent: 'flex-end', zIndex: 1},
+  customerAreaCompact: {top: '11%', height: '41%'},
+  customer: {height: '112%', width: '68%', transform: [{translateY: 90}]},
   orderCard: {position: 'absolute', right: '5%', top: '3%', width: 82, minHeight: 132, paddingVertical: 7, borderRadius: 13, backgroundColor: colors.white, borderWidth: 3, borderColor: colors.outline, alignItems: 'center', justifyContent: 'space-around'},
   recipeName: {fontSize: 9, color: colors.darkBlue, fontWeight: '900', textAlign: 'center'}, orderDish: {width: 58, height: 45}, orderMug: {width: 36, height: 31}, orderPlus: {fontSize: 16, fontWeight: '900', color: colors.darkBlue},
-  kitchenArea: {position: 'absolute', left: 0, right: 0, top: '37%', height: '37%', transform: [{translateY: 120}], zIndex: 2},
+  kitchenArea: {position: 'absolute', left: 0, right: 0, top: '52%', height: '39%', zIndex: 2},
+  kitchenAreaCompact: {top: '50%', height: '40%'},
   counter: {position: 'absolute', width: '100%', height: '100%'},
   teapotSlot: {position: 'absolute', left: '3%', top: '4%', width: '15%', height: '15%', alignItems: 'center', justifyContent: 'center'}, teapot: {width: 52, height: 45},
   cupSlot: {position: 'absolute', left: '4%', top: '18%', width: '13%', height: '13%', alignItems: 'center', justifyContent: 'center'}, cup: {width: 39, height: 34},
@@ -205,6 +209,8 @@ const styles = StyleSheet.create({
   rawFishPress: {position: 'absolute', left: '20%', bottom: '2%', width: '20%', height: '19%', alignItems: 'center', justifyContent: 'center'}, rawGreensPress: {position: 'absolute', left: '40%', bottom: '2%', width: '20%', height: '19%', alignItems: 'center', justifyContent: 'center'}, rawLemonPress: {position: 'absolute', left: '60%', bottom: '2%', width: '18%', height: '19%', alignItems: 'center', justifyContent: 'center'},
   shelfFish: {width: 68, height: 57}, shelfGreens: {width: 68, height: 57}, shelfLemon: {width: 58, height: 50},
   progress: {position: 'absolute', left: 12, bottom: 38, backgroundColor: colors.darkBlue, borderWidth: 3, borderColor: colors.outline, borderRadius: 15, paddingHorizontal: 14, paddingVertical: 10}, progressReady: {backgroundColor: '#25a85a'}, progressText: {color: colors.white, fontWeight: '900', fontSize: 15},
+  progressCompact: {left: 8, bottom: 8, paddingHorizontal: 10, paddingVertical: 7}, progressTextCompact: {fontSize: 13},
   orderTimer: {position: 'absolute', right: 18, top: 58, minWidth: 72, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 14, backgroundColor: colors.darkBlue, borderWidth: 3, borderColor: colors.outline, alignItems: 'center', zIndex: 5}, orderTimerDanger: {backgroundColor: '#dc3f50'}, orderTimerText: {color: colors.white, fontSize: 17, fontWeight: '900'},
   pause: {position: 'absolute', right: 12, bottom: 32},
+  pauseCompact: {right: 8, bottom: 6, transform: [{scale: 0.86}]},
 });

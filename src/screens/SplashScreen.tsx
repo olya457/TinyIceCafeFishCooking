@@ -7,5 +7,5 @@ export function SplashScreen({progress}: {progress: Animated.Value}) {
 }
 
 const styles = StyleSheet.create({
-  fill: {flex: 1, backgroundColor: '#087fdc'}, background: {position: 'absolute', width: '100%', height: '100%'}, content: {flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingTop: '9%', paddingBottom: '9%'}, track: {height: 19, width: 270, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.9)', padding: 3, overflow: 'hidden'}, pill: {height: 13, width: 50, borderRadius: 9, backgroundColor: '#35baf4'},
+  fill: {flex: 1, backgroundColor: '#087fdc'}, background: {position: 'absolute', width: '100%', height: '100%'}, content: {flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingTop: '9%', paddingBottom: '9%'}, track: {height: 19, width: '72%', maxWidth: 270, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.9)', padding: 3, overflow: 'hidden'}, pill: {height: 13, width: 50, borderRadius: 9, backgroundColor: '#35baf4'},
 });

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, StyleSheet, View} from 'react-native';
+import {Animated, AppState, StyleSheet, View} from 'react-native';
 import Video from 'react-native-video';
 import {media} from './src/assets';
 import {GameLoader} from './src/components/GameLoader';
@@ -14,6 +14,16 @@ import {SettingsScreen} from './src/screens/SettingsScreen';
 import {loadProgress, saveProgress} from './src/storage/progress';
 import type {Game, Screen} from './src/types/navigation';
 
+const HEARTS_PER_DAY = 5;
+const HEART_PRICE = 10;
+const getLocalDate = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function App(): React.JSX.Element {
   const [screen, setScreen] = useState<Screen>('splash');
   const [onboardingPage, setOnboardingPage] = useState(-1);
@@ -25,6 +35,7 @@ export default function App(): React.JSX.Element {
   const [fishingCoins, setFishingCoins] = useState(0);
   const [purchasedShopItems, setPurchasedShopItems] = useState<string[]>([]);
   const [hearts, setHearts] = useState(5);
+  const [lastHeartRefreshDate, setLastHeartRefreshDate] = useState(getLocalDate);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const [homeGame, setHomeGame] = useState<Game>('cooking');
   const [sound, setSound] = useState(true);
@@ -70,10 +81,33 @@ export default function App(): React.JSX.Element {
         setCookingCoins(Math.max(saved.cookingCoins, 0));
         setFishingCoins(Math.max(saved.fishingCoins, 0));
         setPurchasedShopItems(saved.purchasedShopItems ?? []);
+        const today = getLocalDate();
+        if (saved.lastHeartRefreshDate === today) {
+          setHearts(Math.max(saved.hearts ?? HEARTS_PER_DAY, 0));
+        } else {
+          setHearts(HEARTS_PER_DAY);
+        }
+        setLastHeartRefreshDate(today);
       }
       setProgressLoaded(true);
     });
   }, []);
+
+  useEffect(() => {
+    const refreshDailyHearts = () => {
+      const today = getLocalDate();
+      if (today !== lastHeartRefreshDate) {
+        setHearts(HEARTS_PER_DAY);
+        setLastHeartRefreshDate(today);
+      }
+    };
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        refreshDailyHearts();
+      }
+    });
+    return () => subscription.remove();
+  }, [lastHeartRefreshDate]);
 
   useEffect(() => {
     if (!progressLoaded) return;
@@ -85,6 +119,8 @@ export default function App(): React.JSX.Element {
       cookingCoins,
       fishingCoins,
       purchasedShopItems,
+      hearts,
+      lastHeartRefreshDate,
     });
   }, [
     cookingCoins,
@@ -93,6 +129,8 @@ export default function App(): React.JSX.Element {
     fishingLevel,
     highestCookingLevel,
     highestFishingLevel,
+    hearts,
+    lastHeartRefreshDate,
     progressLoaded,
     purchasedShopItems,
   ]);
@@ -139,6 +177,12 @@ export default function App(): React.JSX.Element {
     if (purchasedShopItems.includes(id) || cookingCoins < price) return false;
     setCookingCoins(current => current - price);
     setPurchasedShopItems(current => [...current, id]);
+    return true;
+  };
+  const buyHeart = () => {
+    if (cookingCoins < HEART_PRICE) return false;
+    setCookingCoins(current => current - HEART_PRICE);
+    setHearts(current => current + 1);
     return true;
   };
   const resetCookingProgress = () => {
@@ -209,8 +253,10 @@ export default function App(): React.JSX.Element {
           {screen === 'shop' && (
             <ShopScreen
               coins={cookingCoins}
+              hearts={hearts}
               purchasedItems={purchasedShopItems}
               onBuy={buyShopItem}
+              onBuyHeart={buyHeart}
               onHome={() => {
                 setHomeGame('cooking');
                 setScreen('home');

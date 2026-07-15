@@ -12,6 +12,8 @@ export type SavedProgress = {
   cookingCoins: number;
   fishingCoins: number;
   purchasedShopItems: string[];
+  hearts?: number;
+  lastHeartRefreshDate?: string;
 };
 
 export async function loadProgress(): Promise<SavedProgress | null> {

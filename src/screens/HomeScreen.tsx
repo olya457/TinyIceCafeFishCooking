@@ -6,6 +6,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -36,6 +37,8 @@ export function HomeScreen({
   onGame,
   onShop,
 }: HomeScreenProps) {
+  const {height} = useWindowDimensions();
+  const compact = height < 720;
   const [game, setGame] = useState<Game>(initialGame);
   const [activeTab, setActiveTab] = useState<HomeTab>(
     initialGame === 'fishing' ? 'fishing' : 'home',
@@ -58,15 +61,16 @@ export function HomeScreen({
         <TopBar
           hearts={hearts}
           coins={game === 'cooking' ? cookingCoins : fishingCoins}
+          showHearts={game === 'cooking'}
           onSettings={onSettings}
         />
-        <View style={styles.launchArea}>
+        <View style={[styles.launchArea, compact && styles.launchAreaCompact]}>
           <GameButton
             title={game === 'cooking' ? 'Open Café' : 'Go Fishing'}
             onPress={() => onGame(game)}
           />
         </View>
-        <View style={styles.nav}>
+        <View style={[styles.nav, compact && styles.navCompact]}>
           <Nav
             icon="🎣"
             label="Fishing"
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 2,
   },
+  launchAreaCompact: {bottom: 105},
   nav: {
     position: 'absolute',
     left: 6,
@@ -130,6 +135,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 4,
   },
+  navCompact: {bottom: 8, height: 76},
   navItem: {
     flex: 1,
     alignItems: 'center',

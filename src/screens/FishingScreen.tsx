@@ -10,6 +10,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -77,6 +78,8 @@ export function FishingScreen({
   onLevelComplete,
   onSettings,
 }: FishingScreenProps) {
+  const {height} = useWindowDimensions();
+  const compact = height < 720;
   const target = LEVELS[level - 1][0];
   const fishSpeedMultiplier = Math.min(1.8, 1 + (level - 1) * 0.08);
 
@@ -364,14 +367,14 @@ export function FishingScreen({
         <StatusBar hidden />
 
         <SafeAreaView style={styles.fill}>
-          <View style={styles.top}>
+          <View style={[styles.top, compact && styles.topCompact]}>
             <CoinBadge coins={coins} />
 
             <SquareButton icon="Ⅱ" onPress={() => setPaused(true)} />
           </View>
 
-          <View style={styles.gearArea}>
-            <View style={styles.gearRow}>
+          <View style={[styles.gearArea, compact && styles.gearAreaCompact]}>
+            <View style={[styles.gearRow, compact && styles.gearRowCompact]}>
               {fishing.gear.map((source, index) => (
                 <Pressable
                   key={index}
@@ -423,13 +426,13 @@ export function FishingScreen({
       <StatusBar hidden />
 
       <SafeAreaView style={styles.fill}>
-        <View style={styles.top}>
+        <View style={[styles.top, compact && styles.topCompact]}>
           <CoinBadge coins={coins} />
 
           <SquareButton icon="Ⅱ" onPress={() => setPaused(true)} />
         </View>
 
-        <View style={styles.catchBadge}>
+        <View style={[styles.catchBadge, compact && styles.catchBadgeCompact]}>
           <Text style={styles.catchText}>
             Catch {caught}/{target}
           </Text>
@@ -513,7 +516,7 @@ export function FishingScreen({
           Miss
         </Animated.Text>
 
-        <View style={styles.controls}>
+        <View style={[styles.controls, compact && styles.controlsCompact]}>
           <Pressable
             disabled={casting}
             style={[
@@ -768,12 +771,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  topCompact: {top: 18},
 
   gearArea: {
     flex: 1,
     justifyContent: 'flex-end',
     paddingBottom: 62,
   },
+  gearAreaCompact: {paddingBottom: 18},
 
   gearRow: {
     height: 165,
@@ -782,6 +787,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 10,
   },
+  gearRowCompact: {height: 138},
 
   gearCard: {
     flex: 1,
@@ -824,6 +830,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingVertical: 10,
   },
+  catchBadgeCompact: {top: 78, paddingVertical: 7},
 
   catchText: {
     color: colors.white,
@@ -911,6 +918,7 @@ const styles = StyleSheet.create({
     width: 190,
     height: 178,
   },
+  controlsCompact: {bottom: -4, transform: [{scale: 0.84}]},
 
   control: {
     position: 'absolute',

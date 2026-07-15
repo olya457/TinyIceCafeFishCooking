@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -63,8 +64,10 @@ const items = [
 
 type ShopScreenProps = {
   coins: number;
+  hearts: number;
   purchasedItems: string[];
   onBuy: (id: string, price: number) => boolean;
+  onBuyHeart: () => boolean;
   onHome: () => void;
   onFishing: () => void;
   onSettings: () => void;
@@ -72,12 +75,16 @@ type ShopScreenProps = {
 
 export function ShopScreen({
   coins,
+  hearts,
   purchasedItems,
   onBuy,
+  onBuyHeart,
   onHome,
   onFishing,
   onSettings,
 }: ShopScreenProps) {
+  const {height} = useWindowDimensions();
+  const compact = height < 720;
   const [missingCoins, setMissingCoins] = useState<number | null>(null);
 
   const buy = (item: (typeof items)[number]) => {
@@ -105,7 +112,29 @@ export function ShopScreen({
           <CoinBadge coins={coins} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView contentContainerStyle={[styles.list, compact && styles.listCompact]}>
+          <Pressable
+            onPress={() => {
+              if (!onBuyHeart()) {
+                setMissingCoins(10 - coins);
+              }
+            }}
+            style={({pressed}) => [
+              styles.item,
+              coins < 10 && styles.unaffordableItem,
+              pressed && styles.pressedItem,
+            ]}>
+            <View style={styles.imageBox}>
+              <Text style={styles.heartIcon}>♥</Text>
+            </View>
+            <View style={styles.copy}>
+              <Text style={styles.name}>Extra Life</Text>
+              <Text style={styles.upgrade}>You have {hearts} lives</Text>
+            </View>
+            <View style={styles.buyButton}>
+              <Text style={styles.price}>● 10</Text>
+            </View>
+          </Pressable>
           {items.map(item => {
             const purchased = purchasedItems.includes(item.id);
             const affordable = coins >= item.price;
@@ -141,7 +170,7 @@ export function ShopScreen({
           })}
         </ScrollView>
 
-        <View style={styles.nav}>
+        <View style={[styles.nav, compact && styles.navCompact]}>
           <Nav icon="🎣" label="Fishing" onPress={onFishing} />
           <Nav icon="🚚" label="Shop" active onPress={() => {}} />
           <Nav icon="🐟" label="Home" onPress={onHome} />
@@ -218,6 +247,7 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   list: {padding: 12, gap: 15, paddingBottom: 125},
+  listCompact: {paddingTop: 4, gap: 10, paddingBottom: 96},
   item: {
     minHeight: 108,
     borderRadius: 18,
@@ -242,6 +272,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   image: {width: '100%', height: '100%'},
+  heartIcon: {color: '#ff3dab', fontSize: 50, fontWeight: '900'},
   copy: {flex: 1},
   name: {color: colors.white, fontSize: 18, fontWeight: '900'},
   upgrade: {color: '#fff16c', fontWeight: '800', marginTop: 8},
@@ -265,6 +296,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 4,
   },
+  navCompact: {bottom: 8, height: 76},
   navItem: {
     flex: 1,
     alignItems: 'center',

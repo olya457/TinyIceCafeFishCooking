@@ -40,7 +40,7 @@ export function SettingsModal({visible, sound, music, onSound, onMusic, onClose}
 const styles = StyleSheet.create({
   overlay: {flex: 1, backgroundColor: 'rgba(0,20,45,.62)', justifyContent: 'center', alignItems: 'center', padding: 18},
   levelCard: {width: '100%', maxWidth: 410, backgroundColor: colors.blue, borderWidth: 8, borderColor: colors.outline, borderRadius: 48, padding: 22, alignItems: 'center'},
-  smallCard: {width: 330, backgroundColor: colors.blue, borderWidth: 8, borderColor: colors.outline, borderRadius: 48, padding: 24, alignItems: 'center'},
+  smallCard: {width: '100%', maxWidth: 330, backgroundColor: colors.blue, borderWidth: 8, borderColor: colors.outline, borderRadius: 48, padding: 24, alignItems: 'center'},
   topClose: {position: 'absolute', right: 15, top: 10, zIndex: 2}, closeText: {fontSize: 36, color: colors.white, fontWeight: '900'},
   title: {fontFamily: 'Georgia', fontSize: 30, color: colors.white, fontWeight: '900', marginBottom: 10}, subtitle: {fontFamily: 'Georgia', fontSize: 21, color: colors.white, fontWeight: '900'},
   goalRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 12}, goalIcon: {fontSize: 38, color: colors.yellow}, goalText: {color: colors.white, fontSize: 20, fontWeight: '900', marginRight: 18}, hint: {color: colors.white, fontWeight: '700', textAlign: 'center'},

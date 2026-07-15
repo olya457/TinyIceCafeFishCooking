@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -36,6 +37,8 @@ export function SettingsScreen({
   onShop,
   onHome,
 }: SettingsScreenProps) {
+  const {height} = useWindowDimensions();
+  const compact = height < 720;
   const [message, setMessage] = useState('');
 
   return (
@@ -45,7 +48,7 @@ export function SettingsScreen({
       resizeMode="cover">
       <StatusBar hidden />
       <SafeAreaView style={styles.fill}>
-        <View style={styles.card}>
+        <View style={[styles.card, compact && styles.cardCompact]}>
           <Text style={styles.title}>Settings</Text>
 
           <View style={styles.settingRow}>
@@ -89,7 +92,7 @@ export function SettingsScreen({
           {!!message && <Text style={styles.message}>{message}</Text>}
         </View>
 
-        <View style={styles.nav}>
+        <View style={[styles.nav, compact && styles.navCompact]}>
           <Nav icon="🎣" label="Fishing" onPress={onFishing} />
           <Nav icon="🚚" label="Shop" onPress={onShop} />
           <Nav icon="🐟" label="Home" onPress={onHome} />
@@ -134,6 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 42,
     padding: 24,
   },
+  cardCompact: {marginTop: 56, padding: 16, borderRadius: 30, borderWidth: 5},
   title: {
     fontFamily: 'Georgia',
     color: colors.white,
@@ -189,6 +193,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 4,
   },
+  navCompact: {bottom: 8, height: 76},
   navItem: {
     flex: 1,
     alignItems: 'center',
