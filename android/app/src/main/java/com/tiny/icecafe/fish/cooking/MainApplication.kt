@@ -1,4 +1,4 @@
-package com.tinyicecafefishcooking
+package com.tiny.icecafe.fish.cooking
 
 import android.app.Application
 import com.facebook.react.PackageList
