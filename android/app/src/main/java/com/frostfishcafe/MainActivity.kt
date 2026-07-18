@@ -1,4 +1,4 @@
-package com.tiny.icecafe.fish.cooking
+package com.frostfishcafe
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
