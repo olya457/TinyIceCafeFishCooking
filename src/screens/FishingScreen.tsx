@@ -5,6 +5,7 @@ import {
   Easing,
   Image,
   ImageBackground,
+  Platform,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -516,7 +517,15 @@ export function FishingScreen({
           Miss
         </Animated.Text>
 
-        <View style={[styles.controls, compact && styles.controlsCompact]}>
+        <View
+          style={[
+            styles.controls,
+            compact && styles.controlsCompact,
+            Platform.OS === 'android' && styles.controlsAndroid,
+            Platform.OS === 'android' &&
+              compact &&
+              styles.controlsCompactAndroid,
+          ]}>
           <Pressable
             disabled={casting}
             style={[
@@ -919,6 +928,8 @@ const styles = StyleSheet.create({
     height: 178,
   },
   controlsCompact: {bottom: -4, transform: [{scale: 0.84}]},
+  controlsAndroid: {bottom: 35},
+  controlsCompactAndroid: {bottom: 11},
 
   control: {
     position: 'absolute',

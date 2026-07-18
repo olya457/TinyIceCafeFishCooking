@@ -1,5 +1,3 @@
-// Central asset catalogue. Grouping here keeps screens independent of file names
-// and makes a later art replacement a one-line change.
 export const backgrounds = {
   splash: require('./backgrounds/splash.png'),
   cafe: require('./backgrounds/cafe-interior.png'),

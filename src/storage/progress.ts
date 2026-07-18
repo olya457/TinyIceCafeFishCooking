@@ -60,7 +60,5 @@ export async function loadProgress(): Promise<SavedProgress | null> {
 export async function saveProgress(progress: SavedProgress): Promise<void> {
   try {
     await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
-  } catch {
-    // The game remains playable even if device storage is unavailable.
-  }
+  } catch {}
 }

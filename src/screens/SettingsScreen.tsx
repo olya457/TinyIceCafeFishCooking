@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {
   ImageBackground,
+  Platform,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -47,7 +48,11 @@ export function SettingsScreen({
       style={styles.fill}
       resizeMode="cover">
       <StatusBar hidden />
-      <SafeAreaView style={styles.fill}>
+      <SafeAreaView
+        style={[
+          styles.fill,
+          Platform.OS === 'android' && styles.contentAndroid,
+        ]}>
         <View style={[styles.card, compact && styles.cardCompact]}>
           <Text style={styles.title}>Settings</Text>
 
@@ -126,6 +131,7 @@ function Nav({
 
 const styles = StyleSheet.create({
   fill: {flex: 1},
+  contentAndroid: {paddingTop: 15},
   card: {
     width: '88%',
     maxWidth: 390,

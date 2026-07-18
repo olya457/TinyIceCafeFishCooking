@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {
   ImageBackground,
+  Platform,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -57,7 +58,11 @@ export function HomeScreen({
       style={styles.fill}
       resizeMode="cover">
       <StatusBar hidden />
-      <SafeAreaView style={styles.content}>
+      <SafeAreaView
+        style={[
+          styles.content,
+          Platform.OS === 'android' && styles.contentAndroid,
+        ]}>
         <TopBar
           hearts={hearts}
           coins={game === 'cooking' ? cookingCoins : fishingCoins}
@@ -115,6 +120,7 @@ function Nav({
 const styles = StyleSheet.create({
   fill: {flex: 1},
   content: {flex: 1, alignItems: 'center'},
+  contentAndroid: {paddingTop: 15},
   launchArea: {
     position: 'absolute',
     left: 0,

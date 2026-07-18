@@ -3,6 +3,7 @@ import {
   Image,
   ImageBackground,
   Modal,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -105,14 +106,24 @@ export function ShopScreen({
       source={backgrounds.cookingHome}
       style={styles.fill}
       resizeMode="cover">
-      <SafeAreaView style={styles.content}>
+      <SafeAreaView
+        style={[
+          styles.content,
+          Platform.OS === 'android' && styles.contentAndroid,
+        ]}>
         <View style={styles.header}>
           <SquareButton icon="‹" onPress={onHome} />
           <Text style={styles.title}>Shop</Text>
           <CoinBadge coins={coins} />
         </View>
 
-        <ScrollView contentContainerStyle={[styles.list, compact && styles.listCompact]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.list,
+            compact && styles.listCompact,
+            Platform.OS === 'android' && styles.listAndroid,
+            Platform.OS === 'android' && compact && styles.listCompactAndroid,
+          ]}>
           <Pressable
             onPress={() => {
               if (!onBuyHeart()) {
@@ -234,6 +245,7 @@ function Nav({
 const styles = StyleSheet.create({
   fill: {flex: 1},
   content: {flex: 1, backgroundColor: 'rgba(0,40,90,.25)'},
+  contentAndroid: {paddingTop: 15},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,6 +260,8 @@ const styles = StyleSheet.create({
   },
   list: {padding: 12, gap: 15, paddingBottom: 125},
   listCompact: {paddingTop: 4, gap: 10, paddingBottom: 96},
+  listAndroid: {paddingBottom: 140},
+  listCompactAndroid: {paddingBottom: 111},
   item: {
     minHeight: 108,
     borderRadius: 18,

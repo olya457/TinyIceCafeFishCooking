@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, AppState, StyleSheet, View} from 'react-native';
+import {Animated, AppState, Platform, StyleSheet, View} from 'react-native';
 import Video from 'react-native-video';
 import {media} from './src/assets';
 import {GameLoader} from './src/components/GameLoader';
@@ -40,6 +40,7 @@ export default function App(): React.JSX.Element {
   const [homeGame, setHomeGame] = useState<Game>('cooking');
   const [sound, setSound] = useState(true);
   const [music, setMusic] = useState(true);
+  const [appState, setAppState] = useState(AppState.currentState);
   const [levelModal, setLevelModal] = useState<Game | null>(null);
   const [loadingGame, setLoadingGame] = useState<Game | null>(null);
   const loaderProgress = useRef(new Animated.Value(0)).current;
@@ -102,6 +103,7 @@ export default function App(): React.JSX.Element {
       }
     };
     const subscription = AppState.addEventListener('change', state => {
+      setAppState(state);
       if (state === 'active') {
         refreshDailyHearts();
       }
@@ -302,16 +304,17 @@ export default function App(): React.JSX.Element {
           />
         </>
       )}
-      {music && (
-        <Video
-          source={media.backgroundMusic}
-          repeat
-          volume={0.18}
-          ignoreSilentSwitch="ignore"
-          playInBackground
-          style={styles.media}
-        />
-      )}
+      <Video
+        source={media.backgroundMusic}
+        paused={!music || appState !== 'active'}
+        repeat
+        volume={0.18}
+        disableFocus={Platform.OS === 'android'}
+        ignoreSilentSwitch="ignore"
+        playInBackground={false}
+        playWhenInactive={false}
+        style={styles.media}
+      />
     </View>
   );
 }
