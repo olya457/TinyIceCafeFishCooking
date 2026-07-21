@@ -11,7 +11,7 @@ workflows:
         bundle_identifier: com.macjikasrevas.bevikolascerb
       vars:
         APP_STORE_APPLE_ID: 6792993294
-        BUNDLE_ID: 'com.heghoetato.jgahohgiype'
+        BUNDLE_ID: 'com.macjikasrevas.bevikolascerb'
         XCODE_WORKSPACE: 'TinyIceCafeFishCooking.xcworkspace'
         XCODE_SCHEME: 'TinyIceCafeFishCooking'
     scripts:
