@@ -1,19 +1,19 @@
 workflows:
   sample-workflow:
-    name: Letto Max Choice Type
+    name: Tiny I C E Café Fish Cooking
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: Letto Max Choice Type
+      app_store_connect: Tiny Ice Cafe Fish Cooking
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.heghoetato.jgahohgiype
+        bundle_identifier: com.macjikasrevas.bevikolascerb
       vars:
-        APP_STORE_APPLE_ID: 6756238326
+        APP_STORE_APPLE_ID: 6792993294
         BUNDLE_ID: 'com.heghoetato.jgahohgiype'
-        XCODE_WORKSPACE: 'LettoMaxChoiceType.xcworkspace'
-        XCODE_SCHEME: 'LettoMaxChoiceType'
+        XCODE_WORKSPACE: 'TinyIceCafeFishCooking.xcworkspace'
+        XCODE_SCHEME: 'TinyIceCafeFishCooking'
     scripts:
       - name: Install node modules
         script: |
@@ -33,7 +33,7 @@ workflows:
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
       - name: Set Info.plist values
         script: |
-          PLIST=$CM_BUILD_DIR/ios/AwesomeProject/Info.plist
+          PLIST=$CM_BUILD_DIR/ios/TinyIceCafeFishCooking/Info.plist
           PLIST_BUDDY=/usr/libexec/PlistBuddy
           $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST
       - name: Build ipa for distribution
@@ -50,4 +50,4 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_app_store: true
-        copyright: VESA ENSIO LAHDEMAKI
+        copyright: Adrianna Cottrill
